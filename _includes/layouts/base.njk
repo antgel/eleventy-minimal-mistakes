@@ -1,61 +1,151 @@
 <!doctype html>
 <html lang="{{ metadata.language }}">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>{{ title or metadata.title }}</title>
-		<meta name="description" content="{{ description or metadata.description }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title or metadata.title }}</title>
+    <meta name="description" content="{{ description or metadata.description }}">
 
-		{#- Atom and JSON feeds included by default #}
-		<link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="{{ metadata.title }}">
-		<link rel="alternate" href="/feed/feed.json" type="application/json" title="{{ metadata.title }}">
+    {#- Atom and JSON feeds included by default #}
+    <link rel="alternate" href="/feed/feed.xml" type="application/atom+xml" title="{{ metadata.title }}">
+    <link rel="alternate" href="/feed/feed.json" type="application/json" title="{{ metadata.title }}">
 
-		{#- Uncomment this if you’d like folks to know that you used Eleventy to build your site!  #}
-		{#- <meta name="generator" content="{{ eleventy.generator }}"> #}
+    {#- Uncomment this if you’d like folks to know that you used Eleventy to build your site!  #}
+    {#- <meta name="generator" content="{{ eleventy.generator }}"> #}
 
-		{#-
-		CSS bundles are provided via the `eleventy-plugin-bundle` plugin:
-		1. You can add to them using `{% css %}`
-		2. You can get from them using `{% getBundle "css" %}` or `{% getBundleFileUrl "css" %}`
-		3. You can do the same for JS: {% js %}{% endjs %} and <script>{% getBundle "js" %}</script>
-		4. Learn more: https://github.com/11ty/eleventy-plugin-bundle
-		#}
+    {#-
+    CSS bundles are provided via the `eleventy-plugin-bundle` plugin:
+    1. You can add to them using `{% css %}`
+    2. You can get from them using `{% getBundle "css" %}` or `{% getBundleFileUrl "css" %}`
+    3. You can do the same for JS: {% js %}{% endjs %} and <script>{% getBundle "js" %}</script>
+    4. Learn more: https://github.com/11ty/eleventy-plugin-bundle
+    #}
 
-		{#- Add an arbitrary string to the bundle #}
-		{%- css %}* { box-sizing: border-box; }{% endcss %}
-		{#- Add the contents of a file to the bundle #}
-		{%- css %}{% include "public/css/index.css" %}{% endcss %}
-		{#- Or add from node_modules #}
-		{# {%- css %}{% include "node_modules/prismjs/themes/prism-okaidia.css" %}{% endcss %} #}
+    {#- Add an arbitrary string to the bundle #}
+    {%- css %}* { box-sizing: border-box; }{% endcss %}
+    {#- Add the contents of a file to the bundle #}
+    {%- css %}{% include "public/css/index.css" %}{% endcss %}
+    {#- Or add from node_modules #}
+    {# {%- css %}{% include "node_modules/prismjs/themes/prism-okaidia.css" %}{% endcss %} #}
 
-		{#- Render the CSS bundle using Inlined CSS (for the fastest site performance in production) #}
-		<style>{% getBundle "css" %}</style>
-		{#- Renders the CSS bundle using a separate file, if you can't set CSP directive style-src: 'unsafe-inline' #}
-		{#- <link rel="stylesheet" href="{% getBundleFileUrl "css" %}"> #}
-	</head>
-	<body>
-		<a href="#skip" class="visually-hidden">Skip to main content</a>
+    {#- Render the CSS bundle using Inlined CSS (for the fastest site performance in production) #}
+    <style>{% getBundle "css" %}</style>
+    {#- Renders the CSS bundle using a separate file, if you can't set CSP directive style-src: 'unsafe-inline' #}
+    {#- <link rel="stylesheet" href="{% getBundleFileUrl "css" %}"> #}
 
-		<header>
-			<a href="/" class="home-link">{{ metadata.title }}</a>
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+  </head>
 
-			{#- Read more about `eleventy-navigation` at https://www.11ty.dev/docs/plugins/navigation/ #}
-			<nav>
-				<h2 class="visually-hidden">Top level navigation menu</h2>
-				<ul class="nav">
-				{%- for entry in collections.all | eleventyNavigation %}
-					<li class="nav-item"><a href="{{ entry.url }}"{% if entry.url == page.url %} aria-current="page"{% endif %}>{{ entry.title }}</a></li>
-				{%- endfor %}
-				</ul>
-			</nav>
-		</header>
+	<body class="layout--{{ page.layout | default(layout.layout) }}{% if page.classes or layout.classes %}{{ page.classes | default(layout.classes) | join(' ') | prepend(' ') }}{% endif %}">
+    <nav class="skip-links">
+      <ul>
+        <li><a href="#site-nav" class="screen-reader-shortcut">{{ site.data.ui-text[site.locale].skip_primary_nav | default('Skip to primary navigation') }}</a></li>
+        <li><a href="#main" class="screen-reader-shortcut">{{ site.data.ui-text[site.locale].skip_content | default('Skip to content') }}</a></li>
+        <li><a href="#footer" class="screen-reader-shortcut">{{ site.data.ui-text[site.locale].skip_footer | default('Skip to footer') }}</a></li>
+      </ul>
+    </nav>
 
-		<main id="skip">
-			{{ content | safe }}
-		</main>
+    <header>
+      {% set logo_path %}{{ site.logo }}{% endset %}
 
-		<footer></footer>
+      <div class="masthead">
+        <div class="masthead__inner-wrap">
+          <div class="masthead__menu">
+            <nav id="site-nav" class="greedy-nav">
+              {% if logo_path | length %}
+                <a class="site-logo" href="{{ '/' | url }}"><img src="{{ logo_path | url }}" alt="{{ site.masthead_title | default(site.title) }}"></a>
+              {% endif %}
+              <a class="site-title" href="{{ '/' | url }}">
+                {{ site.masthead_title | default(site.title) }}
+                {% if site.subtitle %}<span class="site-subtitle">{{ site.subtitle }}</span>{% endif %}
+              </a>
+              <ul class="visible-links">
+                {%- for link in site.data.navigation.main -%}
+                  <li class="masthead__menu-item">
+                    <a href="{{ link.url | url }}"{% if link.description %} title="{{ link.description }}"{% endif %}>{{ link.title }}</a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+              {% if site.search == true %}
+              <button class="search__toggle" type="button">
+                <span class="visually-hidden">{{ site.data.ui-text[site.locale].search_label | default("Toggle search") }}</span>
+                <i class="fas fa-search"></i>
+              </button>
+              {% endif %}
+              <button class="greedy-nav__toggle hidden" type="button">
+                <span class="visually-hidden">{{ site.data.ui-text[site.locale].menu_label | default("Toggle menu") }}</span>
+                <div class="navicon"></div>
+              </button>
+              <ul class="hidden-links hidden"></ul>
+            </nav>
+          </div>
+        </div>
+      </div>
 
-		<!-- Current page: {{ page.url | htmlBaseUrl }} -->
-	</body>
+      <a href="/" class="home-link">{{ metadata.title }}</a>
+
+      {#- Read more about `eleventy-navigation` at https://www.11ty.dev/docs/plugins/navigation/ #}
+      <nav>
+        <h2 class="visually-hidden">Top level navigation menu</h2>
+        <ul class="nav">
+        {%- for entry in collections.all | eleventyNavigation %}
+          <li class="nav-item"><a href="{{ entry.url }}"{% if entry.url == page.url %} aria-current="page"{% endif %}>{{ entry.title }}</a></li>
+        {%- endfor %}
+        </ul>
+      </nav>
+    </header>
+
+    <main class="initial-content" id="main">
+      {{ content | safe }}
+    </main>
+
+    {% if site.search == true %}
+      <div class="search-content">
+        {# {% include_cached search/search_form.html %} #}
+      </div>
+    {% endif %}
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <div class="page__footer-follow">
+          <ul class="social-icons">
+            {% if site.data.ui-text[site.locale].follow_label %}
+              <li><strong>{{ site.data.ui-text[site.locale].follow_label }}</strong></li>
+            {% endif %}
+
+            {% if site.footer.links %}
+              {% for link in site.footer.links %}
+                {% if link.label and link.url %}
+                  <li><a href="{{ link.url }}" rel="nofollow noopener noreferrer"><i class="{{ link.icon | default('fas fa-link') }}" aria-hidden="true"></i> {{ link.label }}</a></li>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+
+            {% if site.atom_feed.hide | length %}
+              <li><a href="{% if site.atom_feed.path %}{{ site.atom_feed.path }}{% else %}{{ '/feed.xml' | url }}{% endif %}"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> {{ site.data.ui-text[site.locale].feed_label | default("Feed") }}</a></li>
+            {% endif %}
+          </ul>
+        </div>
+
+				{# <div class="page__footer-copyright">&copy; {{ site.time | date: '%Y' }} {{ site.name | default(site.title) }}. {{ site.data.ui-text[site.locale].powered_by | default("Powered by") }} <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div> #}
+      </footer>
+    </div>
+
+		<script src="{{ '/assets/js/main.min.js' | url }}"></script>
+
+		{# {% if site.search == true or page.layout == "search" %} #}
+			{# {%- assign search_provider = site.search_provider | default("lunr") -%} #}
+			{# {%- case search_provider -%} #}
+				{# {%- when "lunr" -%} #}
+					{# {% include_cached search/lunr-search-scripts.html %} #}
+				{# {%- when "google" -%} #}
+					{# {% include_cached search/google-search-scripts.html %} #}
+				{# {%- when "algolia" -%} #}
+					{# {% include_cached search/algolia-search-scripts.html %} #}
+			{# {%- endcase -%} #}
+		{# {% endif %} #}
+
+    <!-- Current page: {{ page.url | htmlBaseUrl }} -->
+  </body>
 </html>
