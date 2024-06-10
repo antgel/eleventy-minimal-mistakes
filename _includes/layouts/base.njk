@@ -55,10 +55,10 @@
           <div class="masthead__menu">
             <nav id="site-nav" class="greedy-nav">
               {% if logo_path | length %}
-                <a class="site-logo" href="{{ '/' | url }}"><img src="{{ logo_path | url }}" alt="{{ site.masthead_title | default(site.title) }}"></a>
+                <a class="site-logo" href="{{ '/' | url }}"><img src="{{ logo_path | url }}" alt="{{ title or metadata.title }}"></a>
               {% endif %}
               <a class="site-title" href="{{ '/' | url }}">
-                {{ site.masthead_title | default(site.title) }}
+                {{ title or metadata.title }}
                 {% if site.subtitle %}<span class="site-subtitle">{{ site.subtitle }}</span>{% endif %}
               </a>
               <ul class="visible-links">
